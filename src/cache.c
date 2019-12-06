@@ -131,11 +131,11 @@ init_cache()
     }
   }
 
-  for(i = 0; i < dcacheSets; i++)
+  for(int i = 0; i < dcacheSets; i++)
   {
     dcache[i] = malloc(dcacheAssoc * sizeof(uint32_t*));
     
-    for(j = 0; j < dcacheAssoc; j++)
+    for(int j = 0; j < dcacheAssoc; j++)
     {
       dcache[i][j] = malloc(dsize * sizeof(uint32_t)); 
       dcache[i][j][1] = 0;
