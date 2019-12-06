@@ -116,14 +116,14 @@ init_cache()
   icache = malloc(icacheSets * sizeof(uint32_t**));
   dcache = malloc(dcacheSets * sizeof(uint32_t**));
   l2cache = malloc(l2cacheSets * sizeof(uint32_t**));
-  int isize = 3
-  int dsize = 3
-  int l2size = 4
+  int isize = 3;
+  int dsize = 3;
+  int l2size = 4;
 
-  for(i = 0; i < icacheSets; i++)
+  for(int i = 0; i < icacheSets; i++)
   {
     icache[i] = malloc(icacheAssoc * sizeof(uint32_t*));
-    for(j = 0; j < icacheAssoc; j++)
+    for(int j = 0; j < icacheAssoc; j++)
     {
       icache[i][j] = malloc(isize * sizeof(uint32_t)); 
       icache[i][j][1] = 0; 
@@ -239,13 +239,14 @@ icache_access(uint32_t addr)
         if(icache[iindex][i][1] == 0)
         {
           i_flag = 1;
-          icache[iindex][0] = itag;
-          icache[iindex][1] = 1;
-          icache[iindex][2] = icacheAssoc - 1;
+          icache[iindex][i][0] = itag;
+          icache[iindex][i][1] = 1;
+          //not here
           for(int j = 0; j < icacheAssoc; j++)
           {
-            if(icache[iindex][j][2] > icache[iindex][2]) icache[iindex][j][2] -= 1;
+            if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
           }
+          icache[iindex][i][2] = icacheAssoc - 1;
         }
       }
 
@@ -255,9 +256,9 @@ icache_access(uint32_t addr)
         {
           if(icache[iindex][2] == 0)
           {
-            icache[i][0] = itag;
-            icache[i][1] = 1;
-            icache[i][2] = icacheAssoc - 1;
+            icache[iindex][i][0] = itag;
+            icache[iindex][i][1] = 1;
+            icache[iindex][i][2] = icacheAssoc - 1;
           }
           else icache[iindex][i][2] -= 1;
         }
@@ -324,7 +325,7 @@ icache_access(uint32_t addr)
           icache[iindex][i][2] = icacheAssoc - 1;
           for(int j = 0; j < icacheAssoc; j++)
           {
-            if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iinex][j][2] -= 1;
+            if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
           }
         }
       }
@@ -420,14 +421,14 @@ dcache_access(uint32_t addr)
         if(dcache[dindex][i][1] == 0)
         {
           d_flag = 1;
-          dcache[dindex][0] = dtag;
-          dcache[dindex][1] = 1;
-          
+          dcache[dindex][i][0] = dtag;
+          dcache[dindex][i][1] = 1;
+          //no
           for(int j = 0; j < dcacheAssoc; j++)
           {
-            if(dcache[dindex][j][2] > dcache[dindex][2]) dcache[dindex][j][2] -= 1;
+            if(dcache[dindex][j][2] > dcache[dindex][i][2]) dcache[dindex][j][2] -= 1;
           }
-          dcache[dindex][2] = dcacheAssoc - 1;
+          dcache[dindex][i][2] = dcacheAssoc - 1;
         }
       }
 
@@ -437,9 +438,9 @@ dcache_access(uint32_t addr)
         {
           if(dcache[dindex][2] == 0)
           {
-            dcache[i][0] = dtag;
-            dcache[i][1] = 1;
-            dcache[i][2] = dcacheAssoc - 1;
+            dcache[dindex][i][0] = dtag;
+            dcache[dindex][i][1] = 1;
+            dcache[dindex][i][2] = dcacheAssoc - 1;
           }
           else dcache[dindex][i][2] -= 1;
         }
@@ -629,7 +630,7 @@ l2cache_access(uint32_t addr)
 
           l2cache[l2index][i][0] = l2tag;
           l2cache[l2index][i][1] = 1;
-          l2cache[leindex][i][2] = l2cacheAssoc - 1;
+          l2cache[l2index][i][2] = l2cacheAssoc - 1;
           if(i_miss) l2cache[l2index][i][3] = 9;
           else if(d_miss) l2cache[l2index][i][3] = 4;
         }
