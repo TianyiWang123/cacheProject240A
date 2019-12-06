@@ -143,11 +143,11 @@ init_cache()
     }
   }
 
-  for(i = 0; i < l2cacheSets; i++)
+  for(int i = 0; i < l2cacheSets; i++)
   {
     l2cache[i] = malloc(l2cacheAssoc * sizeof(uint32_t*));
     
-    for(j = 0; j < l2cacheAssoc; j++)
+    for(int j = 0; j < l2cacheAssoc; j++)
     {
       l2cache[i][j] = malloc(l2size * sizeof(uint32_t)); 
       l2cache[i][j][1] = 0;
