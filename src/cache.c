@@ -60,22 +60,16 @@ uint64_t l2cachePenalties; // L2$ penalties
 //
 //icache ds
 uint32_t*** icache;
-uint32_t** icacheset;
-uint32_t* isetway;
 uint32_t ioffset;
 uint32_t iindex;
 uint32_t itag;
 //dcache ds
 uint32_t*** dcache;
-uint32_t** dcacheset;
-uint32_t* dsetway;
 uint32_t doffset;
 uint32_t dindex;
 uint32_t dtag;
 //l2cache ds
 uint32_t*** l2cache;
-uint32_t** l2cacheset_ds;
-uint32_t* l2setway_ds;
 uint32_t l2offset;
 uint32_t l2index;
 uint32_t l2tag;
@@ -157,23 +151,10 @@ init_cache()
   }
 }
 
-//======================================LOG===================================
+
 // Perform a memory access through the icache interface for the address 'addr'
 // Return the access time for the memory operation
 //
-//function to calculate the log of the input
-uint32_t log_function(uint32_t size)
-{
-  int power = 0;
-  while(size > 1)
-  {
-    power += 1;
-    size /= 2;
-  }
-  return power;
-}
-//=============================================================================
-
 //=============================================================================
 //===================================I=========================================
 //=============================================================================
@@ -191,8 +172,20 @@ icache_access(uint32_t addr)
   if (icacheSets == 0)  return l2cache_access(addr);
 
   uint32_t i_total_bits = 32;
-  uint32_t i_offset_bits = log_function(blocksize);
-  uint32_t i_index_bits = log_function(icacheSets);
+  uint32_t i_offset_bits = 0;
+  uint32_t size = blocksize;
+  while(size > 1)
+  {
+    size/=2;
+    i_offset_bits += 1;
+  }
+  uint32_t i_index_bits = 0;
+  size = icacheSets;
+  while(size > 1)
+  {
+    size/=2;
+    i_index_bits += 1;
+  }
   uint32_t i_tag_bits = i_total_bits - i_offset_bits - i_index_bits;
 
   ioffset = i_addr & ((1 << i_offset_bits) - 1);
@@ -249,7 +242,6 @@ icache_access(uint32_t addr)
             if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
           }
           icache[iindex][i][2] = icacheAssoc - 1;
-          break;
         }
       }
 
@@ -294,8 +286,20 @@ icache_access(uint32_t addr)
       {
         //same as above
         uint32_t d_total_bits = 32;
-        uint32_t d_offset_bits = log_function(blocksize);
-        uint32_t d_index_bits = log_function(dcacheSets);
+        uint32_t d_offset_bits = 0;
+        uint32_t size = blocksize;
+        while(size > 1)
+        {
+          size/=2;
+          d_offset_bits += 1;
+        }
+        uint32_t d_index_bits = 0;
+        size = dcacheSets;
+        while(size > 1)
+        {
+          size/=2;
+          d_index_bits += 1;
+        }
         uint32_t d_tag_bits = d_total_bits - d_offset_bits - d_index_bits;
 
         int tem_index;
@@ -378,8 +382,20 @@ dcache_access(uint32_t addr)
 
   //same as in icache
   uint32_t d_total_bits = 32;
-  uint32_t d_offset_bits = log_function(blocksize);
-  uint32_t d_index_bits = log_function(dcacheSets);
+  uint32_t d_offset_bits = 0;
+  uint32_t size = blocksize;
+  while(size > 1)
+  {
+    size/=2;
+    d_offset_bits += 1;
+  }
+  uint32_t d_index_bits = 0;
+  size = dcacheSets;
+  while(size > 1)
+  {
+    size/=2;
+    d_index_bits += 1;
+  }
   uint32_t d_tag_bits = d_total_bits - d_offset_bits - d_index_bits;
 
   doffset = d_addr & ((1 << d_offset_bits) - 1);
@@ -395,14 +411,16 @@ dcache_access(uint32_t addr)
     {
       if(dcache[dindex][i][0] == dtag)
       {
-        d_hit = 1;
+        d_hit = 1; 
         d_miss = 0;
         for(int j = 0; j < dcacheAssoc; j++)
         {
           if(dcache[dindex][j][2] > dcache[dindex][i][2]) dcache[dindex][j][2] -= 1;
         }
+        dcache[dindex][i][2] = dcacheAssoc - 1;
+        break;
       }
-      dcache[dindex][i][2] = dcacheAssoc - 1;
+      
     }   
   }
 
@@ -454,14 +472,26 @@ dcache_access(uint32_t addr)
       }
     }
     //if l2cache does not hit.
-    if(l2miss)
+    else
     {
       //if inclusive from icache
       if((inclusive) && (inclusive_src == 9))
       {
         uint32_t i_total_bits = 32;
-        uint32_t i_offset_bits = log_function(blocksize);
-        uint32_t i_index_bits = log_function(icacheSets);
+        uint32_t i_offset_bits = 0;
+        uint32_t size = blocksize;
+        while(size > 1)
+        {
+          size/=2;
+          i_offset_bits += 1;
+        }
+        uint32_t i_index_bits = 0;
+        size = icacheSets;
+        while(size > 1)
+        {
+          size/=2;
+          i_index_bits += 1;
+        }
         uint32_t i_tag_bits = i_total_bits - i_offset_bits - i_index_bits;
 
         int tem_index;
@@ -563,8 +593,20 @@ l2cache_access(uint32_t addr)
   //if (icacheSets == 0)  return l2cache_access(addr);
 
   uint32_t l2_total_bits = 32;
-  uint32_t l2_offset_bits = log_function(blocksize);
-  uint32_t l2_index_bits = log_function(l2cacheSets);
+  uint32_t l2_offset_bits = 0;
+  uint32_t size = blocksize;
+  while(size > 1)
+  {
+    size/=2;
+    l2_offset_bits += 1;
+  }
+  uint32_t l2_index_bits = 0;
+  size = l2cacheSets;
+  while(size > 1)
+  {
+    size/=2;
+    l2_index_bits += 1;
+  }
   uint32_t l2_tag_bits = l2_total_bits - l2_offset_bits - l2_index_bits;
 
   l2offset = l2_addr & ((1 << l2_offset_bits) - 1);
@@ -588,9 +630,10 @@ l2cache_access(uint32_t addr)
           if(l2cache[l2index][j][2] > l2cache[l2index][i][2]) l2cache[l2index][j][2] -= 1;
         }
       }
+      l2cache[l2index][i][2] = l2cacheAssoc - 1;
+      break;
     }
-    l2cache[l2index][i][2] = l2cacheAssoc - 1;
-    break;
+    
   }
 
   //if cache hits! return the hit time
@@ -617,13 +660,11 @@ l2cache_access(uint32_t addr)
           if(l2cache[l2index][j][2] > l2cache[l2index][i][2]) l2cache[l2index][j][2] -= 1;
         }
         l2cache[l2index][i][2] = l2cacheAssoc - 1;
-      }
+        if(i_miss) l2cache[l2index][i][3] = 9;
+        else if(d_miss) l2cache[l2index][i][3] = 4;
 
-
-      if(i_miss) l2cache[l2index][i][3] = 9;
-      else if(d_miss) l2cache[l2index][i][3] = 4;
-
-      break;
+        break;
+      } 
     }
 
     if(l2_flag == 0)
