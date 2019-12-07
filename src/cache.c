@@ -215,8 +215,10 @@ icache_access(uint32_t addr)
           if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
         }
       }
+      icache[iindex][i][2] = icacheAssoc - 1;
+      break;
     }
-    icache[iindex][i][2] = icacheAssoc - 1;
+    
   }
 
   //if cache hits! return the hit time
@@ -247,6 +249,7 @@ icache_access(uint32_t addr)
             if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
           }
           icache[iindex][i][2] = icacheAssoc - 1;
+          break;
         }
       }
 
@@ -322,11 +325,13 @@ icache_access(uint32_t addr)
           i_flag = 1;
           icache[iindex][i][0] = itag;
           icache[iindex][i][1] = 1;
-          icache[iindex][i][2] = icacheAssoc - 1;
+          
           for(int j = 0; j < icacheAssoc; j++)
           {
             if(icache[iindex][j][2] > icache[iindex][i][2]) icache[iindex][j][2] -= 1;
           }
+          icache[iindex][i][2] = icacheAssoc - 1;
+          break;
         }
       }
 
@@ -369,7 +374,7 @@ dcache_access(uint32_t addr)
   d_miss = 0;
   uint32_t d_addr = addr;
   
-  if (dcacheSets == 0)  return l2cache_access(d_addr);
+  if (dcacheSets == 0)  return l2cache_access(addr);
 
   //same as in icache
   uint32_t d_total_bits = 32;
@@ -397,8 +402,8 @@ dcache_access(uint32_t addr)
           if(dcache[dindex][j][2] > dcache[dindex][i][2]) dcache[dindex][j][2] -= 1;
         }
       }
-    }
-    dcache[dindex][i][2] = dcacheAssoc - 1;
+      dcache[dindex][i][2] = dcacheAssoc - 1;
+    }   
   }
 
   //if cache hits! return the hit time
@@ -430,6 +435,7 @@ dcache_access(uint32_t addr)
             if(dcache[dindex][j][2] > dcache[dindex][i][2]) dcache[dindex][j][2] -= 1;
           }
           dcache[dindex][i][2] = dcacheAssoc - 1;
+          break;
         }
       }
 
@@ -448,7 +454,7 @@ dcache_access(uint32_t addr)
       }
     }
     //if l2cache does not hit.
-    else
+    if(l2miss)
     {
       //if inclusive from icache
       if((inclusive) && (inclusive_src == 9))
@@ -511,6 +517,7 @@ dcache_access(uint32_t addr)
             if(dcache[dindex][j][2] > dcache[dindex][i][2]) dcache[dindex][j][2] -= 1;
           }
           dcache[dindex][i][2] = dcacheAssoc - 1;
+          break;
         }
       }
 
@@ -583,6 +590,7 @@ l2cache_access(uint32_t addr)
       }
     }
     l2cache[l2index][i][2] = l2cacheAssoc - 1;
+    break;
   }
 
   //if cache hits! return the hit time
