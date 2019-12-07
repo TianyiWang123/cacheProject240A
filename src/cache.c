@@ -409,7 +409,8 @@ dcache_access(uint32_t addr)
     d_hit = 0;
     d_miss = 1;
     dcacheMisses += 1;
-    int l2_memspeed = l2cache_access(addr);
+    int l2_memspeed;
+    l2_memspeed = l2cache_access(addr);
 
     //if l2cache hits! 
     if(l2_hit == 1)
@@ -436,7 +437,7 @@ dcache_access(uint32_t addr)
       {
         for(int i = 0; i < dcacheAssoc; i++)
         {
-          if(dcache[dindex][2] == 0)
+          if(dcache[dindex][i][2] == 0)
           {
             dcache[dindex][i][0] = dtag;
             dcache[dindex][i][1] = 1;
@@ -552,7 +553,7 @@ l2cache_access(uint32_t addr)
   l2_miss = 0;
   uint32_t l2_addr = addr;
 
-  if (icacheSets == 0)  return l2cache_access(addr);
+  //if (icacheSets == 0)  return l2cache_access(addr);
 
   uint32_t l2_total_bits = 32;
   uint32_t l2_offset_bits = log_function(blocksize);
@@ -575,7 +576,7 @@ l2cache_access(uint32_t addr)
       {
         l2_hit = 1;
         l2_miss = 0;
-        for(int j = 0; j < icacheAssoc; j++)
+        for(int j = 0; j < l2cacheAssoc; j++)
         {
           if(l2cache[l2index][j][2] > l2cache[l2index][i][2]) l2cache[l2index][j][2] -= 1;
         }
@@ -602,16 +603,17 @@ l2cache_access(uint32_t addr)
         l2_flag = 1;
         l2cache[l2index][i][0] = l2tag;
         l2cache[l2index][i][1] = 1;
-        l2cache[l2index][i][2] = l2cacheAssoc - 1;
+        
         for(int j = 0; j < l2cacheAssoc; j++)
         {
           if(l2cache[l2index][j][2] > l2cache[l2index][i][2]) l2cache[l2index][j][2] -= 1;
         }
+        l2cache[l2index][i][2] = l2cacheAssoc - 1;
       }
 
 
-      if(i_miss) l2cache[l2index][i][3] = 1;
-      else if(d_miss) l2cache[l2index][i][3] = 2;
+      if(i_miss) l2cache[l2index][i][3] = 9;
+      else if(d_miss) l2cache[l2index][i][3] = 4;
 
       break;
     }
